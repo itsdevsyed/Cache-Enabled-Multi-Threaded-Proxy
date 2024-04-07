@@ -96,3 +96,95 @@ int ParsedHeader_remove(struct ParsedRequest *pr, const char *key)
      tmp->key = NULL;
      return 0;
 }
+
+/* modify the header with given key, giving it a new value
+ * return 1 on success and 0 if no such header found
+ * 
+int ParsedHeader_modify(struct ParsedRequest *pr, const char * key, 
+			const char *newValue)
+{
+     struct ParsedHeader *tmp;
+     tmp = ParsedHeader_get(pr, key);
+     if(tmp != NULL)
+     {
+	  if(tmp->valuelen < strlen(newValue)+1)
+	  {
+	       tmp->valuelen = strlen(newValue)+1;
+	       tmp->value = (char *) realloc(tmp->value, 
+					     tmp->valuelen * sizeof(char));
+	  } 
+	  strcpy(tmp->value, newValue);
+	  return 1;
+     }
+     return 0;
+}
+*/
+
+/*
+  ParsedHeader Private Methods
+*/
+
+void ParsedHeader_create(struct ParsedRequest *pr)
+{
+     pr->headers = 
+     (struct ParsedHeader *)malloc(sizeof(struct ParsedHeader)*DEFAULT_NHDRS);
+     pr->headerslen = DEFAULT_NHDRS;
+     pr->headersused = 0;
+} 
+
+
+size_t ParsedHeader_lineLen(struct ParsedHeader * ph)
+{
+     if(ph->key != NULL)
+     {
+	  return strlen(ph->key)+strlen(ph->value)+4;
+     }
+     return 0; 
+}
+
+size_t ParsedHeader_headersLen(struct ParsedRequest *pr) 
+{
+     if (!pr || !pr->buf)
+	  return 0;
+
+     size_t i = 0;
+     int len = 0;
+     while(pr->headersused > i)
+     {
+	  len += ParsedHeader_lineLen(pr->headers + i);
+	  i++;
+     }
+     len += 2;
+     return len;
+}
+
+int ParsedHeader_printHeaders(struct ParsedRequest * pr, char * buf, 
+			      size_t len)
+{
+     char * current = buf;
+     struct ParsedHeader * ph;
+     size_t i = 0;
+
+     if(len < ParsedHeader_headersLen(pr))
+     {
+	  debug("buffer for printing headers too small\n");
+	  return -1;
+     }
+  
+     while(pr->headersused > i)
+     {
+	  ph = pr->headers+i;
+	  if (ph->key) {
+	       memcpy(current, ph->key, strlen(ph->key));
+	       memcpy(current+strlen(ph->key), ": ", 2);
+	       memcpy(current+strlen(ph->key) +2 , ph->value, 
+		      strlen(ph->value));
+	       memcpy(current+strlen(ph->key) +2+strlen(ph->value) , 
+		      "\r\n", 2);
+	       current += strlen(ph->key)+strlen(ph->value)+4;
+	  }
+	  i++;
+     }
+     memcpy(current, "\r\n",2);
+     return 0;
+}
