@@ -18,17 +18,17 @@
 #define PROXY_PARSE
 
 #define DEBUG 1
-* 
-   ParsedRequest objects are created from parsing a buffer containing a HTTP
-   request. The request buffer consists of a request line followed by a number
-   of headers. Request line fields such as method, protocol etc. are stored
-   explicitly. Headers such as 'Content-Length' and their values are maintained
-   in a linked list. Each node in this list is a ParsedHeader and contains a
-   key-value pair.
+// * 
+//    ParsedRequest objects are created from parsing a buffer containing a HTTP
+//    request. The request buffer consists of a request line followed by a number
+//    of headers. Request line fields such as method, protocol etc. are stored
+//    explicitly. Headers such as 'Content-Length' and their values are maintained
+//    in a linked list. Each node in this list is a ParsedHeader and contains a
+//    key-value pair.
 
-   The buf and buflen fields are used internally to maintain the parsed request
-   line.
- */
+//    The buf and buflen fields are used internally to maintain the parsed request
+//    line.
+//  */
 struct ParsedRequest {
      char *method; 
      char *protocol; 
@@ -72,5 +72,11 @@ void ParsedRequest_destroy(struct ParsedRequest *pr);
    line, headers and the trailing \r\n. buf will not be NUL terminated by
    unparse().
  */
-int ParsedRequest_unparse(struct ParsedRequest *pr, char *buf, 
-			  size_t buflen);
+struct parsedHeader
+{
+   char *key ;
+   size_t keylen;
+   char *value ;
+   size_t valueloen
+}
+ u 

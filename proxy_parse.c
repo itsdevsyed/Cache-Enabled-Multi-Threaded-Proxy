@@ -1,6 +1,5 @@
-#include<stdio.h>
-int main ()
-{
-     printf("hello world  hello dude");
-     return 0 ; 
-}
+#include "proxy_parse.h"
+
+#define DEFAULT_NHDRS 8
+#define MAX_REQ_LEN 65535
+#define MIN_REQ_LEN 4
