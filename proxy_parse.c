@@ -11,3 +11,17 @@ int ParsedRequest_printRequestLine(struct ParsedRequest *pr,
 				   char * buf, size_t buflen,
 				   size_t *tmp);
 size_t ParsedRequest_requestLineLen(struct ParsedRequest *pr);
+/*
+ * debug() prints out debugging info if DEBUG is set to 1
+ *
+ * parameter format: same as printf 
+ *
+ */
+void debug(const char * format, ...) {
+     va_list args;
+     if (DEBUG) {
+	  va_start(args, format);
+	  vfprintf(stderr, format, args);
+	  va_end(args);
+     }
+}
