@@ -1,9 +1,7 @@
 /*
- * proxy_parse.h -- a HTTP Request Parsing Library.
+ * proxy_parse.h -- A HTTP Request Parsing Library.
  *
- * Written by: Matvey Arye
- * For: COS 518 
- * 
+ * This library provides functions for parsing HTTP requests.
  */
 
 #include <stdio.h>
@@ -18,65 +16,81 @@
 #define PROXY_PARSE
 
 #define DEBUG 1
-// * 
-//    ParsedRequest objects are created from parsing a buffer containing a HTTP
-//    request. The request buffer consists of a request line followed by a number
-//    of headers. Request line fields such as method, protocol etc. are stored
-//    explicitly. Headers such as 'Content-Length' and their values are maintained
-//    in a linked list. Each node in this list is a ParsedHeader and contains a
-//    key-value pair.
 
-//    The buf and buflen fields are used internally to maintain the parsed request
-//    line.
-//  */
+/* ParsedRequest represents a parsed HTTP request. */
 struct ParsedRequest {
-     char *method; 
-     char *protocol; 
-     char *host; 
-     char *port; 
-     char *path;
-     char *version;
-     char *buf;
-     size_t buflen;
-     struct ParsedHeader *headers;
-     size_t headersused;
-     size_t headerslen;
+     char *method;        // The HTTP method (e.g., GET, POST)
+     char *protocol;      // The protocol (e.g., HTTP)
+     char *host;          // The host (e.g., www.example.com)
+     char *port;          // The port (e.g., 80)
+     char *path;          // The path (e.g., /index.html)
+     char *version;       // The HTTP version (e.g., 1.1)
+     char *buf;           // Buffer to store the request
+     size_t buflen;       // Length of the buffer
+     struct ParsedHeader *headers; // Linked list of headers
+     size_t headersused;  // Number of headers used
+     size_t headerslen;   // Total length of headers
 };
 
-/* 
-   ParsedHeader: any header after the request line is a key-value pair with the
-   format "key:value\r\n" and is maintained in the ParsedHeader linked list
-   within ParsedRequest
-*/
+/* ParsedHeader represents a single HTTP header. */
 struct ParsedHeader {
-     char * key;
-     size_t keylen;
-     char * value;
-     size_t valuelen;
+     char * key;    // The header key
+     size_t keylen; // Length of the key
+     char * value;  // The header value
+     size_t valuelen; // Length of the value
 };
 
-/* Create an empty parsing object to be used exactly once for parsing a single
- * request buffer */
+/* Create an empty ParsedRequest object. */
 struct ParsedRequest* ParsedRequest_create();
 
-/* Parse the request buffer in buf given that buf is of length buflen */
-int ParsedRequest_parse(struct ParsedRequest * parse, const char *buf,
-			int buflen);
+/* Parse an HTTP request in the buffer 'buf' of length 'buflen'. */
+int ParsedRequest_parse(struct ParsedRequest * parse, const char *buf, int buflen);
 
-/* Destroy the parsing object. */
+/* Destroy a ParsedRequest object and free its memory. */
 void ParsedRequest_destroy(struct ParsedRequest *pr);
 
-/* 
-   Retrieve the entire buffer from a parsed request object. buf must be an
-   allocated buffer of size buflen, with enough space to write the request
-   line, headers and the trailing \r\n. buf will not be NUL terminated by
-   unparse().
- */
-struct parsedHeader
-{
-   char *key ;
-   size_t keylen;
-   char *value ;
-   size_t valueloen
-}
- u 
+/* Retrieve the entire buffer from a parsed request object. */
+int ParsedRequest_unparse(struct ParsedRequest *pr, char *buf, size_t buflen);
+
+/* Retrieve the headers from a parsed request object. */
+int ParsedRequest_unparse_headers(struct ParsedRequest *pr, char *buf, size_t buflen);
+
+/* Get the total length of a parsed request. */
+size_t ParsedRequest_totalLen(struct ParsedRequest *pr);
+
+/* Get the length of the headers of a parsed request. */
+size_t ParsedHeader_headersLen(struct ParsedRequest *pr);
+
+/* Set a header key-value pair in a parsed request. */
+int ParsedHeader_set(struct ParsedRequest *pr, const char * key, const char * value);
+
+/* Get a header value from a parsed request. */
+struct ParsedHeader* ParsedHeader_get(struct ParsedRequest *pr, const char * key);
+
+/* Remove a header from a parsed request. */
+int ParsedHeader_remove (struct ParsedRequest *pr, const char * key);
+
+/* Print debug information if DEBUG is set to 1. */
+void debug(const char * format, ...);
+
+/* Example usage:
+   
+   Create a ParsedRequest object
+   struct ParsedRequest *req = ParsedRequest_create();
+
+   Parse the request
+   if (ParsedRequest_parse(req, request, strlen(request)) < 0) {
+       printf("Failed to parse request\n");
+       return -1;
+   }
+
+     Access the parsed fields
+   printf("Method: %s\n", req->method);
+   printf("Host: %s\n", req->host);
+   printf("Path: %s\n", req->path);
+
+   Clean up
+   ParsedRequest_destroy(req);
+*/
+
+#endif
